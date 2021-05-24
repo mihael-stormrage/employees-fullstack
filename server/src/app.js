@@ -2,8 +2,7 @@ import Express from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 
-import indexRouter from './routes';
-import usersRouter from './routes/users';
+import apiRouter from './routes';
 
 const app = new Express();
 
@@ -12,7 +11,6 @@ app.use(Express.json());
 app.use(Express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api', apiRouter);
 
 export default app;
