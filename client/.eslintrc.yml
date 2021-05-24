@@ -1,0 +1,21 @@
+---
+extends:
+  - airbnb
+  - react-app
+  - react-app/jest
+  - plugin:jest/recommended
+  - plugin:react/recommended
+
+plugins:
+  - jest
+
+env:
+  es2021: true
+  node: true
+  jest: true
+  browser: true
+
+rules:
+  react/prefer-stateless-function: 1
+  react/state-in-constructor: 0
+  react/react-in-jsx-scope: 0
