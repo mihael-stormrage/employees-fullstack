@@ -2,6 +2,8 @@ import { PureComponent } from 'react';
 import MaterialTable from 'material-table';
 import axios from 'axios';
 
+import ComboBoxInput from './components/ComboBoxInput';
+
 class App extends PureComponent {
   state = { employees: [], jobs: [], departments: [] };
 
@@ -29,16 +31,7 @@ class App extends PureComponent {
             field: 'job',
             lookup: jobs.reduce((acc, { id, name }) => ({ ...acc, [id]: name }), {}),
             editComponent: (props) => (
-              <Autocomplete
-                renderInput={(params) => (
-                  // eslint-disable-next-line react/jsx-props-no-spreading
-                  <TextField {...params} />
-                )}
-                options={jobs.map(({ name }) => name)}
-                freeSolo
-                value={props.value}
-                onChange={(e, newValue) => props.onChange(newValue)}
-              />
+              <ComboBoxInput {...props} options={jobs} />
             ),
           }, {
             title: 'Дата Рождения',
@@ -75,6 +68,7 @@ class App extends PureComponent {
             this.setState({ employees: employees.filter(({ id }) => id !== dbId) });
           },
           onRowUpdate: async (newData, oldData) => {
+            console.log(newData);
             await axios.put('/api/employees', newData);
             const index = oldData.tableData.id;
             const updatedData = [...employees];
