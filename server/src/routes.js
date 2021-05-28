@@ -6,10 +6,10 @@ const router = new Router();
 
 router.get('/employees', (req, res) => {
   const query = `
-    SELECT e.id, first_name, last_name, patronymic, tel, email, birthday, j.name AS job, d.name AS department
-        FROM employees e
-            JOIN department_jobs j ON j.id = e.job_id
-            JOIN departments d ON d.id = j.department_id`;
+      SELECT e.id, first_name, last_name, patronymic, tel, email, birthday, j.name AS job, d.name AS department
+      FROM employees e
+               LEFT JOIN department_jobs j ON j.id = e.job_id
+               LEFT JOIN departments d ON d.id = j.department_id`;
   pool.query(query, (q_err, q_res) => res.json(q_res.rows));
 });
 
