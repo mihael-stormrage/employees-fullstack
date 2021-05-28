@@ -1,9 +1,6 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'react-bootstrap-table/dist/react-bootstrap-table-all.min.css';
 import { PureComponent } from 'react';
+import MaterialTable from 'material-table';
 import axios from 'axios';
-
-import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
 class App extends PureComponent {
   state = { employees: [], jobs: [], departments: [] };
@@ -17,39 +14,42 @@ class App extends PureComponent {
 
   render() {
     const { employees, jobs, departments } = this.state;
-    const textFilter = { type: 'TextFilter', condition: 'like' };
-    const selectFilter = (ent) => ({
-      type: 'SelectFilter',
-      condition: 'like',
-      options: ent.map(({ name }) => name),
-    });
     return (
-      <BootstrapTable
+      <MaterialTable
+        columns={[
+          { title: 'Фамилия', field: 'last_name' },
+          { title: 'Имя', field: 'first_name' },
+          { title: 'Отчество', field: 'patronymic' },
+          { title: 'Отдел', field: 'department' },
+          { title: 'Должность', field: 'job' },
+          { title: 'Дата Рождения', field: 'birthday' },
+          { title: 'Мобильный телефон', field: 'tel' },
+          { title: 'Электронная почта', field: 'email' },
+        ]}
         data={employees}
-        keyField="id"
-        version="4"
-        hover
-        insertRow
-        deleteRow
-        selectRow={{ mode: 'checkbox' }}
-        exportCSV
-        pagination
-        ignoreSinglePage
-        options={{ }}
-      >
-        <TableHeaderColumn dataField="last_name" dataSort filter={textFilter}>Фамилия</TableHeaderColumn>
-        <TableHeaderColumn dataField="first_name" filter={textFilter}>Имя</TableHeaderColumn>
-        <TableHeaderColumn dataField="patronymic" filter={textFilter}>Отчество</TableHeaderColumn>
-        <TableHeaderColumn dataField="department" filter={selectFilter(departments)}>
-          Отдел
-        </TableHeaderColumn>
-        <TableHeaderColumn dataField="job" dataSort filter={selectFilter(jobs)}>
-          Должность
-        </TableHeaderColumn>
-        <TableHeaderColumn dataField="birthday">Дата рождения</TableHeaderColumn>
-        <TableHeaderColumn dataField="tel">Мобильный телефон</TableHeaderColumn>
-        <TableHeaderColumn dataField="email">Электронная почта</TableHeaderColumn>
-      </BootstrapTable>
+        title="Энергозапас: Сотрудники"
+        editable={{
+          onRowAdd: async (newData) => {
+            // const { job, department } = newData;
+            // const jobId = jobs.find(({ name }) => name === job)?.id;
+            // const departmentId = departments.find(({ name }) => name === department)?.id;
+            await axios.post('/api/employees', { ...newData /* jobId, departmentId */ });
+            this.setState({ employees: [...employees, newData] });
+          },
+          onRowDelete: async (oldData) => {
+            const { id: dbId } = oldData;
+            await axios.delete(`/api/employees/${dbId}`);
+            this.setState({ employees: employees.filter(({ id }) => id !== dbId) });
+          },
+          onRowUpdate: async (newData, oldData) => {
+            await axios.put('/api/employees', newData);
+            const index = oldData.tableData.id;
+            const updatedData = [...employees];
+            updatedData[index] = newData;
+            this.setState({ employees: updatedData });
+          },
+        }}
+      />
     );
   }
 }
