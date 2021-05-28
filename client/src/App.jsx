@@ -18,16 +18,49 @@ class App extends PureComponent {
       <MaterialTable
         columns={[
           { title: 'Фамилия', field: 'last_name' },
-          { title: 'Имя', field: 'first_name' },
-          { title: 'Отчество', field: 'patronymic' },
-          { title: 'Отдел', field: 'department' },
-          { title: 'Должность', field: 'job' },
-          { title: 'Дата Рождения', field: 'birthday' },
-          { title: 'Мобильный телефон', field: 'tel' },
-          { title: 'Электронная почта', field: 'email' },
+          { title: 'Имя', field: 'first_name', sorting: false },
+          { title: 'Отчество', field: 'patronymic', sorting: false }, {
+            title: 'Отдел',
+            field: 'department_id',
+            sorting: false,
+            lookup: departments.reduce((acc, { id, name }) => ({ ...acc, [id]: name }), {}),
+          }, {
+            title: 'Должность',
+            field: 'job',
+            lookup: jobs.reduce((acc, { id, name }) => ({ ...acc, [id]: name }), {}),
+            editComponent: (props) => (
+              <Autocomplete
+                renderInput={(params) => (
+                  // eslint-disable-next-line react/jsx-props-no-spreading
+                  <TextField {...params} />
+                )}
+                options={jobs.map(({ name }) => name)}
+                freeSolo
+                value={props.value}
+                onChange={(e, newValue) => props.onChange(newValue)}
+              />
+            ),
+          }, {
+            title: 'Дата Рождения',
+            field: 'birthday',
+            type: 'date',
+            filtering: false,
+            sorting: false,
+          }, {
+            title: 'Мобильный телефон',
+            field: 'tel',
+            filtering: false,
+            sorting: false,
+          }, {
+            title: 'Электронная почта',
+            field: 'email',
+            filtering: false,
+            sorting: false,
+          },
         ]}
         data={employees}
         title="Энергозапас: Сотрудники"
+        options={{ exportButton: true, filtering: true, search: false }}
         editable={{
           onRowAdd: async (newData) => {
             // const { job, department } = newData;
