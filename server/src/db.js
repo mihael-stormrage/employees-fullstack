@@ -1,9 +1,6 @@
-import { Pool } from 'pg';
+import knex from 'knex';
+import knexfile from '../knexfile';
 
-export default new Pool({
-  user: 'mihan',
-  host: 'localhost',
-  database: 'energozapas',
-  password: '',
-  port: 5432,
-});
+const db = knex(knexfile);
+
+export default db;
