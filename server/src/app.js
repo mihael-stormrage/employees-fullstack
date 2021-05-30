@@ -1,6 +1,6 @@
 import Express from 'express';
 import cookieParser from 'cookie-parser';
-const logger = require('morgan');
+import logger from 'morgan';
 
 import apiRouter from './routes';
 
