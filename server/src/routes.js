@@ -4,18 +4,18 @@ const router = new Router();
 
 /* Employees */
 
-const getValues = ({ id, job_id, first_name, last_name, patronymic, tel, email, birthday }) => [
-  job_id, first_name, last_name, patronymic, tel, email, birthday, id
+const getValues = ({ job_id, first_name, last_name, patronymic, tel, email, birthday }) => [
+  job_id, first_name, last_name, patronymic, tel, email, birthday
 ];
 
-const upsertEmployee = async (employeeQuery, req, res) => {
+const upsertEmployee = async (employeeQuery, queryParams, req, res) => {
   const upsertJobsQuery = `
     INSERT INTO department_jobs (department_id, name) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING id`;
   const { job, job_id, department_id } = req.body;
   const client = await pool.connect();
   await client.query('BEGIN');
-  if (!job_id && job) req.body.job_id = (await client.query(upsertJobsQuery, [department_id || null, job])).rows[0].id;
-  const insertRes = await client.query(employeeQuery, getValues(req.body));
+  if (!job_id && job) req.body.job_id = (await client.query(upsertJobsQuery, [department_id, job])).rows[0].id;
+  const insertRes = await client.query(employeeQuery, queryParams);
   await client.query('COMMIT');
   client.release();
   res.json(insertRes.rows[0]);
@@ -23,8 +23,7 @@ const upsertEmployee = async (employeeQuery, req, res) => {
 
 router.get('/employees', (req, res) => {
   const query = `
-      SELECT e.id, first_name, last_name, patronymic, tel, email, birthday,
-             job_id, department_id, j.name AS job, d.name AS department
+      SELECT e.id, first_name, last_name, patronymic, tel, email, birthday, job_id, department_id
       FROM employees e
                LEFT JOIN department_jobs j ON j.id = e.job_id
                LEFT JOIN departments d ON d.id = j.department_id`;
@@ -35,7 +34,7 @@ router.post('/employees', (req, res, next) => {
   const addEmployeeQuery = `
     INSERT INTO employees(job_id, first_name, last_name, patronymic, tel, email, birthday)
         VALUES ($1, $2, $3, $4, $5, $6, $7)`;
-  upsertEmployee(addEmployeeQuery, req, res);
+  upsertEmployee(addEmployeeQuery, getValues(req.body), req, res);
 });
 
 router.put('/employees', (req, res, next) => {
@@ -49,7 +48,7 @@ router.put('/employees', (req, res, next) => {
             email = $6,
             birthday = $7
         WHERE id = $8`;
-  upsertEmployee(updateEmployeeQuery, req, res);
+  upsertEmployee(updateEmployeeQuery, [...getValues(req.body), req.body.id], req, res);
 });
 
 router.delete('/employees/:id', (req, res, next) => {

@@ -7,8 +7,8 @@ import apiRouter from './routes';
 const app = new Express();
 
 app.use(logger('dev'));
+app.use(Express.urlencoded({ extended: true }));
 app.use(Express.json());
-app.use(Express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use('/api', apiRouter);
